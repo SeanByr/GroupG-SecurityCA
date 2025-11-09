@@ -15,9 +15,14 @@ package com.example.groupgsecurityca.Security;
     - It can also handle the updating of keys, rotating salts and store metadata
  */
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.LocalDate;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,25 +41,69 @@ public class KeyGenerator {
 
     //HashMap that stores the users information that uses their username as the key
     private final Map<String, Keys> storedKeys = new HashMap<>();
+    private static final String USERS_FILE = "src/main/resources/com/example/groupgsecurityca/data/users.txt";
+
+    public KeyGenerator() {
+        try {
+            loadUsersFromFile();
+        } catch (IOException e) {
+            System.out.println("No existing users file found. Starting fresh.");
+        }
+    }
+
+
 
     //method that registers a new user by generating a unique salt and hash for their key
-    public void registerKey(String username, String key) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
-        String salt = SaltGenerator.generateSalt(); //generate random salt for user
-        String hash = HashingManager.hashKey(key, salt); //hash the users key using the generated salt
-        storedKeys.put(username, new Keys(salt, hash)); //store the salt and hash
+    public void registerKey(String username, String key) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, IOException {
+        String salt = SaltGenerator.generateSalt();
+        String hash = HashingManager.hashKey(key, salt);
+        storedKeys.put(username, new Keys(salt, hash));
 
-        System.out.println("Registered: "+username+" with salt + hash");
+        //save to file
+        saveUserToFile(username, salt, hash);
+
+        System.out.println("Registered: " + username + " with salt + hash");
     }
 
-    //Verify users key with stored hash of user
+    //verify the users key with stored hash of user
     public boolean verifyKey(String username, String inputKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
-        Keys record = storedKeys.get(username); //look up the users key in the HashMap
+        Keys record = storedKeys.get(username);
+        if (record == null) return false;
 
-        // if doesnt exist return false
-        if(record == null){
-            return false;
-        }
-        //compare the stored hash and input using HashingManager
         return HashingManager.verifyKey(inputKey, record.salt, record.hash);
     }
+
+    //save user to file
+    private void saveUserToFile(String username, String salt, String hash) throws IOException {
+        File file = new File(USERS_FILE);
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Username: ").append(username).append("\n");
+        sb.append("Salt: ").append(salt).append("\n");
+        sb.append("Hash: ").append(hash).append("\n");
+        sb.append("Algorithm: PBKDF2WithHmacSHA256").append("\n");
+        sb.append("Iterations: 65536").append("\n");
+        sb.append("Created Date: ").append(LocalDate.now()).append("\n");
+        sb.append("---------------------------\n");
+
+        Files.write(file.toPath(), sb.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+    }
+
+    //load users into memory when started up
+    private void loadUsersFromFile() throws IOException {
+        File file = new File(USERS_FILE);
+        if (!file.exists()) return;
+
+        for (String line : Files.readAllLines(file.toPath())) {
+            String[] parts = line.split("\\|");
+            if (parts.length >= 3) {
+                storedKeys.put(parts[0], new Keys(parts[1], parts[2]));
+            }
+        }
+    }
 }
+
