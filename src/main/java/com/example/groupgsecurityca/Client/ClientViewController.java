@@ -81,7 +81,7 @@ public class ClientViewController implements Initializable {
                 hBox.getChildren().add(textFlow);
                 vBox_Message.getChildren().add(hBox);
 
-                client.sendMessage(message);
+                //client.sendMessage(message);
                 textField_Message.clear();
             }
         });
