@@ -13,9 +13,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import lombok.Setter;
-import org.w3c.dom.Text;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -83,6 +83,7 @@ public class GroupChatController implements Initializable {
         });
     }
 
+    // method for showing other client messages from the group chat in the gui
     public static void addLabel(String receivedMessage, VBox vBox){
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER_LEFT);

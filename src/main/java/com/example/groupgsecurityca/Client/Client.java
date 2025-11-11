@@ -23,14 +23,20 @@ public class Client {
     private BufferedReader in;
     private BufferedWriter out;
     private String username;
+    private String password;
 
     // create client objects that represent each client on the server
-    public Client(Socket socket) {
+    public Client(Socket socket, String username, String password) {
         try {
             this.socket = socket;
+            this.username = username;
+            this.password = password;
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            this.username = in.readLine();
+
+            out.write(username);
+            out.newLine();
+            out.flush();
 
         }catch(IOException e){
             CloseEverything(socket, in, out);
