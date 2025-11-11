@@ -7,54 +7,75 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
 public class SecurityTest {
-    public static void main(String[]args) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException{
-        KeyGenerator gen = new KeyGenerator();
 
-        //register 2 users
-        gen.registerKey("pat", "random123");
-        gen.registerKey("michael", "ran123");
+    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, Exception {
+        KeyGenerator keyGen = new KeyGenerator();
 
-        //print their data and see stored salt and hash
-        System.out.println("User Data");
-        printUserData(gen, "pat");
-        printUserData(gen, "michael");
+        // ---- Register users ----
+        System.out.println("Registering users...");
+        keyGen.registerKey("pat", "random123");
+        keyGen.registerKey("michael", "ran123");
 
-        //verification tests
-        System.out.println("TESTS");
-        System.out.println("Pat correct key: "+gen.verifyKey("pat", "random123"));
-        System.out.println("Pat wrong key: "+gen.verifyKey("pat", "random321"));
-        System.out.println("Michael correct key: "+gen.verifyKey("michael", "ran123"));
-        System.out.println("Michael wrong key: "+gen.verifyKey("michael", "ran321"));
+        System.out.println("\nTesting login verification...\n");
 
-    }
+        // ---- Test correct passwords ----
+        System.out.println("Pat correct password: " + keyGen.verifyKey("pat", "random123"));
+        System.out.println("Michael correct password: " + keyGen.verifyKey("michael", "ran123"));
 
-    // print the users salt and hash
-    private static void printUserData(KeyGenerator gen, String username){
-        try {
-            //gets the private "storedKeys" from "KeyGenerator"
-            var field = KeyGenerator.class.getDeclaredField("storedKeys");
-            field.setAccessible(true);
-            var storedKeys = (Map<String, ?>) field.get(gen);
-            var record = storedKeys.get(username);
-
-            if (record != null) {
-                //get the salt and hash fileds
-                var saltField = record.getClass().getDeclaredField("salt");
-                var hashField = record.getClass().getDeclaredField("hash");
-                saltField.setAccessible(true);
-                hashField.setAccessible(true);
-
-                //print the salt and hash
-                System.out.println("User: " + username);
-                System.out.println("Salt: " + saltField.get(record));
-                System.out.println("Hash: " + hashField.get(record));
-                System.out.println();
-            } else {
-                System.out.println("User not found: " + username);
-            }
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        // ---- Test incorrect passwords ----
+        System.out.println("Pat wrong password: " + keyGen.verifyKey("pat", "wrong123"));
+        System.out.println("Michael wrong password: " + keyGen.verifyKey("michael", "wrong321"));
     }
 }
+
+//public class SecurityTest {
+//    public static void main(String[]args) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException{
+//        KeyGenerator gen = new KeyGenerator();
+//
+//        //register 2 users
+//        gen.registerKey("pat", "random123");
+//        gen.registerKey("michael", "ran123");
+//
+//        //print their data and see stored salt and hash
+//        System.out.println("User Data");
+//        printUserData(gen, "pat");
+//        printUserData(gen, "michael");
+//
+//        //verification tests
+//        System.out.println("TESTS");
+//        System.out.println("Pat correct key: "+gen.verifyKey("pat", "random123"));
+//        System.out.println("Pat wrong key: "+gen.verifyKey("pat", "random321"));
+//        System.out.println("Michael correct key: "+gen.verifyKey("michael", "ran123"));
+//        System.out.println("Michael wrong key: "+gen.verifyKey("michael", "ran321"));
+//
+//    }
+//
+//    // print the users salt and hash
+//    private static void printUserData(KeyGenerator gen, String username){
+//        try {
+//            //gets the private "storedKeys" from "KeyGenerator"
+//            var field = KeyGenerator.class.getDeclaredField("storedKeys");
+//            field.setAccessible(true);
+//            var storedKeys = (Map<String, ?>) field.get(gen);
+//            var record = storedKeys.get(username);
+//
+//            if (record != null) {
+//                //get the salt and hash fileds
+//                var saltField = record.getClass().getDeclaredField("salt");
+//                var hashField = record.getClass().getDeclaredField("hash");
+//                saltField.setAccessible(true);
+//                hashField.setAccessible(true);
+//
+//                //print the salt and hash
+//                System.out.println("User: " + username);
+//                System.out.println("Salt: " + saltField.get(record));
+//                System.out.println("Hash: " + hashField.get(record));
+//                System.out.println();
+//            } else {
+//                System.out.println("User not found: " + username);
+//            }
+//
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+//    }
