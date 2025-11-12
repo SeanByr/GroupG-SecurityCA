@@ -3,33 +3,29 @@ package com.example.groupgsecurityca.AES;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
 import java.util.Base64;
+
+ /*
+    Base Template for now before we go ahead...
+    Generate a secret Key via AES(algorithm) ADVANCED ENCRYPTION STANDARD
+    Encrypt message into readable bytes
+    Decrypt the message into readable text
+    Encode and Decode the data using Base64 for string handling
+  */
 
 public class AES_KEY {
     private SecretKey key;          // var to store secret encryption key
     private int KEY_SIZE = 128;    // AES key size set to 128bits /key size constraints
     private int T_LEN = 128;        // Auth tag length for GCM (128)
-    //    private Cipher encryptionC;     // Cipher Object
-    private byte[] IV;
+    private Cipher encryptionC;     // Cipher Object
 
     // Used to create encryption keys
-    public void init() throws Exception {
+    public void init() throws Exception{
         // Create a KeyGenrator to create random AES keys
         KeyGenerator gen = KeyGenerator.getInstance("AES");
         gen.init(KEY_SIZE);
         key = gen.generateKey();
-
-        IV = new byte[12];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(IV);
-    }
-
-    public void initFromStrings(String secretKey, String IV){
-        key = new SecretKeySpec(decode(secretKey), "AES");
-        this.IV = decode(IV);
     }
 
     /*
@@ -39,82 +35,45 @@ public class AES_KEY {
         Transform byte message into cipher text
         encode the ciphertext into Base64
     */
-    public String encryptOLD(String message) throws Exception {
-        byte[] messageInBytes = message.getBytes(); // take String message (input message) fromtext to byte array
-        Cipher encryptionC = Cipher.getInstance("AES/GCM/NoPadding"); // Cipher instance for AES algortihm in GCM no padding
-        encryptionC.init(Cipher.ENCRYPT_MODE, key); // initialize using key
-        IV = encryptionC.getIV();
 
-        byte[] encryptedB = encryptionC.doFinal(messageInBytes); // transform message into encrypted bytes
-
-        return encode(encryptedB); // encode bytes to BASE64 strign and return
+    public void initBytes(byte[] keyB) throws Exception{
+        key = new SecretKeySpec(keyB, "AES");
     }
 
-    public String encrypt(String message) throws Exception {
-        byte[] messageInBytes = message.getBytes(); // take String message (input message) fromtext to byte array
-        Cipher encryptionC = Cipher.getInstance("AES/GCM/NoPadding"); // Cipher instance for AES algortihm in GCM no padding
-        GCMParameterSpec spec = new GCMParameterSpec(T_LEN, IV);
-        encryptionC.init(Cipher.ENCRYPT_MODE, key, spec); // initialize using key
-        IV = encryptionC.getIV();
+    public String encrypt(String message) throws Exception{
 
+        encryptionC = Cipher.getInstance("AES/GCM/NoPadding"); // Cipher instance for AES algortihm in GCM no padding
+        encryptionC.init(Cipher.ENCRYPT_MODE,key); // initialize using key
+
+        byte[] messageInBytes = message.getBytes(); // take String message (input message) fromtext to byte array
         byte[] encryptedB = encryptionC.doFinal(messageInBytes); // transform message into encrypted bytes
 
-        return encode(encryptedB); // encode bytes to BASE64 strign and return
+        // Combine IV and CipherText so it can be reused
+        byte[] iv = encryptionC.getIV();
+        byte[] combinedIV = new byte[iv.length + encryptedB.length];
+        // copy from array (iv) get index of source Pos (0), copy to destination (combinedIV), at destination Position index (0), length = whatever is in it
+        System.arraycopy(iv, 0, combinedIV, 0, iv.length); // Just copying no encryption yet
+        System.arraycopy(encryptedB, 0, combinedIV, iv.length, encryptedB.length); // Copy encrypted data
+
+        return encode(combinedIV); // encode bytes to BASE64 strign and return
     }
+    public String decrypt(String encryptedMessages) throws Exception{
 
-    public String decrypt(String encryptedMessages) throws Exception {
-
-        byte[] messageInBytes = decode(encryptedMessages);
-        Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
-
-        // GCM param spec with Auth length, and same IV used during encryption
-        GCMParameterSpec spec = new GCMParameterSpec(T_LEN, IV);
-
-        // Initalize Cipher decrypt in DECYPT MODE using key and IV spec above
-        decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
-
-        // encrypted bytes to basic text
-        byte[] decryptedBytes = decryptionCipher.doFinal(messageInBytes);
-        return new String(decryptedBytes); // return decrypted bytes to String
-
+        return encryptedMessages;
     }
 
     // encode the ciphertext into Base64
-    private String encode(byte[] data) { // byte array encodes Base64 and return
+    private String encode (byte[] data) { // byte array encodes Base64 and return
         return Base64.getEncoder().encodeToString(data);
 
     }
 
     // decrypt original message
-    public byte[] decode(String data) { // take Base64 string and decode into byte array and return
-        return Base64.getDecoder().decode(data);
+    private String decode (String data) {
+
+        return data;
     }
 
-    public String getEncodedKey(){
-        return Base64.getEncoder().encodeToString(key.getEncoded());
-    }
 
-    public String getEncodedIV(){
-        return Base64.getEncoder().encodeToString(IV);
-    }
 
-    private void exportKeys(){
-        System.out.println("SecretKey: " + encode(key.getEncoded()));
-        System.out.println("IV: " + encode(IV));
-    }
-
-    public static void main(String[] args) {
-        try {
-            AES_KEY aes = new AES_KEY();
-            aes.initFromStrings("8K4cIL63J+1IeDU0Umk6EQ==", "2eWo3CN/vjsAHRVJ");
-            String encryptedMessage = aes.encrypt("HelloWorld");
-            String decryptedMessage = aes.decrypt(encryptedMessage);
-
-            System.out.println("Encrypted Message: " + encryptedMessage);
-            System.out.println("Decrypted Message: " + decryptedMessage);
-
-//            aes.exportKeys();
-        } catch (Exception ignored) {
-        }
-    }
 }

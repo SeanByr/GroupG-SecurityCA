@@ -77,7 +77,7 @@ public class ClientApplication extends Application {
         //TODO : replace with create Client loader (think josh is making that)
 
 
-        // GROUP CHAT LOADER
+          // GROUP CHAT LOADER
 //        FXMLLoader GroupChatLoader = new FXMLLoader(ClientApplication.class.getResource("/com/example/groupgsecurityca/client-groupchat-view.fxml"));
 //        Scene scene = new Scene(GroupChatLoader.load(), 478, 396);
 //        stage.setTitle("Group Chat");
