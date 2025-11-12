@@ -4,6 +4,7 @@ import com.example.groupgsecurityca.AES.AES_KEY;
 import com.example.groupgsecurityca.Controllers.GroupChatController;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
+import com.example.groupgsecurityca.AES.AES_KEY;
 
 import java.io.*;
 import java.net.Socket;
@@ -47,6 +48,8 @@ public class Client {
 
 
             out.write(username);
+            out.newLine();
+            out.write(password);
             out.newLine();
             out.flush();
 
@@ -116,3 +119,4 @@ public class Client {
     }
 
 }
+

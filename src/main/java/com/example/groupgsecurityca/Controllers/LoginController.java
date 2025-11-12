@@ -2,6 +2,7 @@ package com.example.groupgsecurityca.Controllers;
 
 import com.example.groupgsecurityca.AES.AES_KEY;
 import com.example.groupgsecurityca.Client.Client;
+import com.example.groupgsecurityca.Security.Login;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -13,10 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import lombok.Setter;
-import org.controlsfx.control.action.Action;
-
-
+import javafx.scene.control.Alert;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -46,9 +44,19 @@ public class LoginController implements Initializable {
                 String password = passwordTF.getText();
 
                 if (username.isEmpty() || password.isEmpty()) {
-                    LoginErrors();
+                    LoginErrors("Username and password cant be empty");
                     return;
                 }
+
+                /*  Joshua Boyne (23343338)
+                    Validates the entered username and password and compares it to the users.txt file information
+                    Calls Login.validateUser() to check if the information matches
+                */
+                if (!Login.validateUser(username, password)) {
+                    LoginErrors("Invalid username or password.");
+                    return;
+                }
+
                 try {
                     Socket socket = new Socket("localhost", 1234);
 
@@ -77,5 +85,17 @@ public class LoginController implements Initializable {
     }
 
     // TODO : show errors upon entering wrong credentials into fields
-    public void LoginErrors(){}
+
+    /*
+        Joshua Boyne (23343338)
+        Displays login errors (invalid information, empty fields etc)
+     */
+
+    public void LoginErrors(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Login Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }
