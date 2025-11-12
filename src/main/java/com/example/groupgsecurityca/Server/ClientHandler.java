@@ -1,5 +1,7 @@
 package com.example.groupgsecurityca.Server;
 
+import com.example.groupgsecurityca.AES.AES_KEY;
+
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -13,12 +15,13 @@ public class ClientHandler implements Runnable {
     BufferedReader in;
     BufferedWriter out;
     String clientUsername;
-
+    private AES_KEY aes; // must be initiliazed to decrypt messages during broadcast
 
     //constructor for creating/adding new clients to list
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, AES_KEY aes) {
         try{
             this.socket = socket;
+            this.aes = aes;
             //initialize input and output streams for client socket
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -41,10 +44,20 @@ public class ClientHandler implements Runnable {
         String receivedMessage;
 
         while(socket.isConnected()){
+
             try{
-                receivedMessage = in.readLine(); //message received by a client
-                broadcastClientMessage(receivedMessage);//broadcast the message to other clients
-            }catch(IOException e){
+                receivedMessage = in.readLine(); // encrypted from client
+
+
+                String decryptedMessage = receivedMessage;
+                try {
+                    decryptedMessage = aes.decrypt(receivedMessage);
+                } catch(Exception ignored){}
+
+                System.out.println("[" + clientUsername + "]: " + decryptedMessage);
+
+                broadcastClientMessage(receivedMessage); // send ENCRYPTED version to clients
+            } catch(IOException e){
                 catchEverything(socket,in,out);
                 break;
             }

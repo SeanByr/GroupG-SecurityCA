@@ -89,6 +89,12 @@ public class AES_KEY {
         return Base64.getEncoder().encodeToString(data);
     }
 
+     // Export key bytes for server
+    public byte[] getEncoded() {
+        return key.getEncoded();
+    }
+
+
     // decrypt original message
     private byte[] decode (String data) {
         return Base64.getDecoder().decode(data); // take Base64 string and decode into byte array and return
