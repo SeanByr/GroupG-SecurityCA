@@ -1,5 +1,6 @@
 package com.example.groupgsecurityca.Controllers;
 
+import com.example.groupgsecurityca.AES.AES_KEY;
 import com.example.groupgsecurityca.Client.Client;
 import com.example.groupgsecurityca.Security.Login;
 import javafx.event.ActionEvent;
@@ -58,6 +59,9 @@ public class LoginController implements Initializable {
 
                 try {
                     Socket socket = new Socket("localhost", 1234);
+
+                    AES_KEY aes = new  AES_KEY();
+
                     Client client = new Client(socket, username, password);
 
                     FXMLLoader groupChatLoader = new FXMLLoader(getClass().getResource("/com/example/groupgsecurityca/client-groupchat-view.fxml"));
@@ -73,6 +77,8 @@ public class LoginController implements Initializable {
                     stage.show();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

@@ -2,19 +2,36 @@ package com.example.groupgsecurityca.Server;
 
 import com.example.groupgsecurityca.AES.AES_KEY;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Base64;
 
 public class Server {
 
     private final ServerSocket serverSocket;
+    private static String aesKeyString;
+    private AES_KEY aes;
 
     public Server(ServerSocket serverSocket) {
+
         this.serverSocket = serverSocket;
+
+        try {
+        // Generate AES key once
+        AES_KEY aes = new AES_KEY();
+        aes.init();
+        byte[] keyBytes = aes.getEncoded(); // ref getEncoded, from AES for Server
+        aesKeyString = Base64.getEncoder().encodeToString(keyBytes);
+        System.out.println("[Server] AES key generated: " + aesKeyString);
+    } catch (Exception e) {
+        System.out.println("Failed to generate AES key");
+        e.printStackTrace();
     }
+
+    }
+
+
 
     //start server port 1234, listening for any potential users
     public void startServer() {
@@ -23,7 +40,12 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connection");
 
-                ClientHandler clientHandler = new ClientHandler(socket);
+                // SEnds the AES key string to client
+                socket.getOutputStream().write((aesKeyString + "\n").getBytes());
+                socket.getOutputStream().flush();
+
+
+                ClientHandler clientHandler = new ClientHandler(socket, aes);
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();
@@ -43,12 +65,6 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Server opening connection");
-        ServerSocket serverSocket = new ServerSocket(1234);
-        Server server = new Server(serverSocket);
-        server.startServer();
-    }
 }
 
 

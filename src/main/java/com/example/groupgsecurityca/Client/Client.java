@@ -1,5 +1,6 @@
 package com.example.groupgsecurityca.Client;
 
+import com.example.groupgsecurityca.AES.AES_KEY;
 import com.example.groupgsecurityca.Controllers.GroupChatController;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
@@ -7,8 +8,7 @@ import com.example.groupgsecurityca.AES.AES_KEY;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
-
+import java.util.Base64;
 
 /*
 Client Class - Sean Byrne 23343362
@@ -27,6 +27,7 @@ public class Client {
     private BufferedWriter out;
     private String username;
     private String password;
+    private AES_KEY aes;
 
     // create client objects that represent each client on the server
     public Client(Socket socket, String username, String password) {
@@ -37,7 +38,15 @@ public class Client {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-            //send username and password to server
+            String base64Key = in.readLine();
+            byte[] keyBytes = Base64.getDecoder().decode(base64Key);
+
+            aes = new AES_KEY();
+            aes.initBytes(keyBytes); // get key bytes = base64 -- key
+            System.out.println("[Client] AES key received and initialized."); // make sure is working
+
+
+
             out.write(username);
             out.newLine();
             out.write(password);
@@ -46,6 +55,8 @@ public class Client {
 
         }catch(IOException e){
             CloseEverything(socket, in, out);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -55,29 +66,36 @@ public class Client {
     public void SendMessage(String sendMessage){
         try {
                 // TODO : encrypt before message is written out to the server for broadcasting
+            String encrypted = aes.encrypt(sendMessage); // encrypted messages when sending
 
-                out.write(sendMessage);
+                out.write(encrypted);
                 out.newLine();
                 out.flush();
         }catch(IOException e){
             CloseEverything(socket, in, out);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     // separate thread that listens for messages broadcast by the Server(ClientHandler class)
     // TODO : decrypt the message
-    public void ListenForMessages(VBox vBox){
-        new Thread(()->{
-            try{
+    public void ListenForMessages(VBox vBox) {
+        new Thread(() -> {
+            try {
                 String receivedMessage;
-                while((receivedMessage = in.readLine()) != null) {
-                    // TODO : probably have the message decrypted here
-                    String decryptedMessage = receivedMessage;
-                    Platform.runLater(()->{
-                        GroupChatController.addLabel(decryptedMessage, vBox);
+                while ((receivedMessage = in.readLine()) != null) {
+                    String decrypted = receivedMessage;
+                    try {
+                        decrypted = aes.decrypt(receivedMessage);
+                    } catch (Exception ignored) {}
+
+                    String finalDecrypted = decrypted;
+                    Platform.runLater(() -> {
+                        GroupChatController.addLabel(finalDecrypted, vBox);
                     });
                 }
-            }catch(IOException e){
+            } catch (IOException e) {
                 CloseEverything(socket, in, out);
             }
         }).start();

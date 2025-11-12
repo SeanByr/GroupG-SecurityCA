@@ -20,21 +20,23 @@ import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
 
-    public static ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
-    private Socket socket;
+    public static ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>(); //keep track of clients
+    private Socket socket; //socket for connection to client
     BufferedReader in;
     BufferedWriter out;
     String clientUsername;
+    private AES_KEY aes; // must be initiliazed to decrypt messages during broadcast
 
-
-    //constructor for creating/adding new clients to chat
-    public ClientHandler(Socket socket) {
+    //constructor for creating/adding new clients to list
+    public ClientHandler(Socket socket, AES_KEY aes) {
         try{
             this.socket = socket;
+            this.aes = aes;
+            //initialize input and output streams for client socket
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-            //read username and password from client
+            //take clients information and add them, then announce on server and console
             this.clientUsername = in.readLine();
             String clientPassword = in.readLine();
 
@@ -66,11 +68,11 @@ public class ClientHandler implements Runnable {
             }
 
             clients.add(this);
-            broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + "has entered the chatroom!");
-            System.out.println("["+ getDate() + "]" + clientUsername + "Entered Server");
+            broadcastClientMessage("[" + getDate() + "] Server: " + clientUsername + " has entered the chatroom!"); //could add timestamps
+            System.out.println("["+ getDate() + "]" + clientUsername + " Entered Server");
 
         }catch(IOException e){
-            catchEverything(socket,in,out);
+            catchEverything(socket,in,out);//clean resources and remove client when triggered
         }
     }
 
@@ -139,26 +141,33 @@ public class ClientHandler implements Runnable {
 
 
     //takes in all received messages from clients to be broadcast
-    //will change code when adding encryption/decryption
 
     @Override
     public void run() {
         String receivedMessage;
 
         while(socket.isConnected()){
-            try{
-                receivedMessage = in.readLine();
 
-                broadcastClientMessage(receivedMessage);
-            }catch(IOException e){
+            try{
+                receivedMessage = in.readLine(); // encrypted from client
+
+
+                String decryptedMessage = receivedMessage;
+                try {
+                    decryptedMessage = aes.decrypt(receivedMessage);
+                } catch(Exception ignored){}
+
+                System.out.println("[" + clientUsername + "]: " + decryptedMessage);
+
+                broadcastClientMessage(receivedMessage); // send ENCRYPTED version to clients
+            } catch(IOException e){
                 catchEverything(socket,in,out);
                 break;
             }
         }
     }
 
-    //broadcast messages to all clients
-    //might need to change based on encryption/decryption
+    //broadcast messages to all clients except sender
 
     public void broadcastClientMessage(String message){
         try{
@@ -174,7 +183,7 @@ public class ClientHandler implements Runnable {
             catchEverything(socket,in,out);
         }
     }
-
+    //method to get current time for time user joins
     public String getDate(){
         DateTimeFormatter datetf = DateTimeFormatter.ofPattern("HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
@@ -185,8 +194,8 @@ public class ClientHandler implements Runnable {
 
     public void removeFromClientHandler(){
         clients.remove(this);
-        broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + "has left the chatroom!");
-        System.out.println("[" + getDate() + "]" + clientUsername + "Left the server");
+        broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + " has left the chatroom!");
+        System.out.println("[" + getDate() + "]" + clientUsername + " Left the server");
 
     }
 
