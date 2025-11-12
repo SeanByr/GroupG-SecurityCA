@@ -5,12 +5,35 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.groupgsecurityca.Controllers.LoginController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.TextField?>
+<AnchorPane fx:id="loginAP"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.groupgsecurityca.Controllers.LoginController"
+            prefHeight="300" prefWidth="478">
+    <Label layoutX="30" layoutY="80" text="Username">
+        <font>
+            <Font name="Arial Rounded MT Bold" size="23"/>
+        </font>
+    </Label>
+    <TextField fx:id="usernameTF" layoutX="30" layoutY="110"
+               prefWidth="420" prefHeight="26"/>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+    <Label layoutX="30" layoutY="160" text="Password">
+        <font>
+            <Font name="Arial Rounded MT Bold" size="23"/>
+        </font>
+    </Label>
+    <TextField fx:id="passwordTF" layoutX="30" layoutY="190"
+               prefHeight="26" prefWidth="420"/>
+
+    <Button fx:id="loginBTN" layoutX="210" layoutY="250" text="Login"/>
+
+    <Label layoutX="196" layoutY="26" text="Login">
+        <font>
+            <Font name="Arial Rounded MT Bold" size="23"/>
+        </font>
+    </Label>
+
+</AnchorPane>
