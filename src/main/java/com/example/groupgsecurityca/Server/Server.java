@@ -9,28 +9,31 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
-    private ServerSocket serverSocket;
 
-    public Server(ServerSocket serverSocket){
+    private final ServerSocket serverSocket;
+
+    public Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
     }
 
-
-    public void StartServer(){
+    //start server port 1234, listening for any potential users
+    public void startServer() {
         try{
-            while(!serverSocket.isClosed()) {
+            while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Client connected to the Server!");
+                System.out.println("New client connection");
+
                 ClientHandler clientHandler = new ClientHandler(socket);
+
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
         }catch(IOException e){
-            CloseServerSocket(serverSocket);
+            closeServerSocket(serverSocket);
         }
     }
 
-    public void CloseServerSocket(ServerSocket serverSocket){
+    public void closeServerSocket(ServerSocket serverSocket) {
         try{
             if(serverSocket != null){
                 serverSocket.close();
@@ -39,4 +42,13 @@ public class Server {
             e.printStackTrace();
         }
     }
+
+    public static void main(String[] args) throws IOException {
+        System.out.println("Server opening connection");
+        ServerSocket serverSocket = new ServerSocket(1234);
+        Server server = new Server(serverSocket);
+        server.startServer();
+    }
 }
+
+

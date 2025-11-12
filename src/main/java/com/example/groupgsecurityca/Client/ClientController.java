@@ -1,5 +1,6 @@
 package com.example.groupgsecurityca.Client;
 
+import com.example.groupgsecurityca.Security.Login;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -58,15 +59,23 @@ public class ClientController implements Initializable {
         String username = usernameTF.getText();
         String password = passwordTF.getText();
 
+        //check empty fields
         if (username.isEmpty() || password.isEmpty()) {
 //            showError();
+            System.out.println("Please enter your username and password");
+            return;
+        }
+
+        //validate user information from user.txt
+        if(!Login.validateUser(username, password)){
+            System.out.println("Invalid username or password");
             return;
         }
 
         Socket socket = new Socket("localhost", 1234);
         Client client = new Client(socket, username, password);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/clientserverjavafx/client-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/groupgsecurityca/client-groupchat-view.fxml"));
         Parent root = loader.load();
 
         ClientViewController controller = loader.getController();
@@ -76,6 +85,8 @@ public class ClientController implements Initializable {
         Stage stage = (Stage) loginBTN.getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
+
+        System.out.println("Successfull login from: "+username);
     }
 
 
@@ -167,48 +178,5 @@ public class ClientController implements Initializable {
                 }
             }
         });
-
-
-//            client.ListenForMessages(vBox_Message);
-//            client.sendMessage();
-
-
-//        vBox_Message.heightProperty().addListener(new ChangeListener<Number>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//                scrollPane_Main.setVvalue((Double) newValue);
-//            }
-//        });
-//
-//        client.ListenForMessages(vBox_Message);
-//
-//        button_send.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent actionEvent) {
-//                String message = textField_Message.getText();
-//                if(!message.isEmpty()){
-//                    HBox hBox = new HBox();
-//                    hBox.setAlignment(Pos.CENTER_RIGHT);
-//
-//                    hBox.setPadding(new Insets(5, 5, 5, 10));
-//                    Text text = new Text(message);
-//                    TextFlow textFlow = new TextFlow(text);
-//                    textFlow.setStyle("-fx-color: rgb(239,242,255); " +
-//                            "-fx-background-color: rgb(15,125,242);" +
-//                            " -fx-background-radius: 20px");
-//
-//                    textFlow.setPadding(new Insets(5, 10, 5, 10));
-//                    text.setFill(Color.color(0.934, 0.945, 0.966));
-//
-//                    hBox.getChildren().add(textFlow);
-//                    vBox_Message.getChildren().add(hBox);
-//
-//
-//                    client.sendMessage(message);
-//                    textField_Message.clear();
-//            }
-//
-//            }
-//        });
     }
 }

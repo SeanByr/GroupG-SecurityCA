@@ -28,12 +28,27 @@ public class ServerApplication extends Application {
 //    stage.show();
 //}
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Opening Port...");
-        ServerSocket serverSocket = new ServerSocket(1234);
+//    public static void main(String[] args) throws IOException {
+//        System.out.println("Opening Port...");
+//        ServerSocket serverSocket = new ServerSocket(1234);
+//        Server server = new Server(serverSocket);
+////        server.StartServer();
+//        new Thread(() -> server.StartServer()).start();
+//        launch();
+//    }
+//}
+public static void main(String[] args) {
+    final int PORT = 1234; //define port for our server
+
+    try{
+        System.out.println("Server starting");
+        ServerSocket serverSocket = new ServerSocket(PORT);
+
         Server server = new Server(serverSocket);
-//        server.StartServer();
-        new Thread(() -> server.StartServer()).start();
-        launch();
+        server.startServer();
+    }catch(IOException e){
+        System.out.println("Failed to start server");
+        e.printStackTrace();
     }
+}
 }
