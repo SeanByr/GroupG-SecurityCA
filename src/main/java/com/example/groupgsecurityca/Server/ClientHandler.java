@@ -24,7 +24,7 @@ public class ClientHandler implements Runnable {
 
             this.clientUsername = in.readLine();
             clients.add(this);
-            broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + "has entered the chatroom!"); //could add timestamps
+            broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + " has entered the chatroom!"); //could add timestamps
             System.out.println("["+ getDate() + "]" + clientUsername + "Entered Server");
 
         }catch(IOException e){
