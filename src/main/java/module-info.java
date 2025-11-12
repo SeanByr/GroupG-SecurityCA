@@ -10,6 +10,8 @@ module com.example.groupgsecurityca {
     requires org.kordamp.bootstrapfx.core;
 //    requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires static lombok;
+    requires java.desktop;
 
     opens com.example.groupgsecurityca to javafx.fxml;
     exports com.example.groupgsecurityca.Server;
