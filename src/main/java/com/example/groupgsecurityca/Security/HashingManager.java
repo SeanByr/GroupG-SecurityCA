@@ -25,9 +25,9 @@ import java.util.Base64;
 public class HashingManager {
 
     //PBKDF2 hashing algorithm and parameters
-    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
-    private static final int ITERATIONS = 65536; //number of iterations
-    private static final int KEY_LENGTH = 256; //length of the generated hash in bits
+    public static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+    public static final int ITERATIONS = 65536; //number of iterations
+    public static final int KEY_LENGTH = 256; //length of the generated hash in bits
 
 
     //hashing the key + salt
