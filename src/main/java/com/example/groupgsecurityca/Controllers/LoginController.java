@@ -19,7 +19,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-
 public class LoginController implements Initializable {
     @FXML
     private Button loginBTN;
@@ -72,7 +71,6 @@ public class LoginController implements Initializable {
                     stage.setScene(new Scene(root));
                     stage.setTitle("Client: " + username);
                     stage.show();
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

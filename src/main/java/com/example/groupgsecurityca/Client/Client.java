@@ -52,28 +52,14 @@ public class Client {
     // gets the message from the client-groupchat-view.fxml textfield
     // sends the message to the Server(ClientHandler class) to be broadcast to all clients
     // TODO : encrypt the message
-
-    // ****** UNDER NO CIRCUMSTANCES UNCOMMENT THIS METHOD ******
-//    public void SendMessage(String sendMessage){
-//        try {
-//            while(socket.isConnected()) {
-//                // TODO : encrypt before message is written out to the server for broadcasting
-//
-//                out.write(sendMessage);
-//                out.newLine();
-//                out.flush();
-//            }
-//        }catch(IOException e){
-//            CloseEverything(socket, in, out);
-//        }
-//    }
-
     public void SendMessage(String sendMessage){
         try {
-            out.write(sendMessage);
-            out.newLine();
-            out.flush();
-        } catch(IOException e){
+                // TODO : encrypt before message is written out to the server for broadcasting
+
+                out.write(sendMessage);
+                out.newLine();
+                out.flush();
+        }catch(IOException e){
             CloseEverything(socket, in, out);
         }
     }

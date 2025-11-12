@@ -52,7 +52,7 @@ public class GroupChatController implements Initializable {
         clientNameLB.setText(username);
 
         clientVBox.heightProperty().addListener((observable, oldValue, newValue) ->
-                clientGroupChatSP.setVvalue((Double) newValue));
+            clientGroupChatSP.setVvalue((Double) newValue));
 
         client.ListenForMessages(clientVBox);
 
