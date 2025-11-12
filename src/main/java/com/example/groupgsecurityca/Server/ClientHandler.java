@@ -52,7 +52,6 @@ public class ClientHandler implements Runnable {
     }
 
     //broadcast messages to all clients
-    //might need to change based on encryption/decryption
 
     public void broadcastClientMessage(String message){
         try{
