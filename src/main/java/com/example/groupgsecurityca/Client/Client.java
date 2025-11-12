@@ -48,13 +48,11 @@ public class Client {
     // TODO : encrypt the message
     public void SendMessage(String sendMessage){
         try {
-            while(socket.isConnected()) {
                 // TODO : encrypt before message is written out to the server for broadcasting
 
                 out.write(sendMessage);
                 out.newLine();
                 out.flush();
-            }
         }catch(IOException e){
             CloseEverything(socket, in, out);
         }
