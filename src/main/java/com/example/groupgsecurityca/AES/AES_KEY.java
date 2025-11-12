@@ -3,6 +3,7 @@ package com.example.groupgsecurityca.AES;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
@@ -57,23 +58,40 @@ public class AES_KEY {
 
         return encode(combinedIV); // encode bytes to BASE64 strign and return
     }
-    public String decrypt(String encryptedMessages) throws Exception{
 
-        return encryptedMessages;
+    //Conor doing the decryption
+    //decrypts AES encryped message
+    public String decrypt(String encryptedMessages) throws Exception {
+        byte[] combinedIV = decode(encryptedMessages); //convert string back into raw bytes
+        byte[] iv = new byte[12];//the stored format
+        System.arraycopy(combinedIV, 0, iv, 0, 12); // copy first 12 bytes
+
+        byte[] cipherText = new byte[combinedIV.length - 12]; // - the IV size from encrypted data
+        System.arraycopy(combinedIV, 12, cipherText, 0, cipherText.length); // only take the encrypted data first 12
+
+        byte[] messageInBytes = decode(encryptedMessages);
+        Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");//initialize cipher instance
+
+        // GCM param spec with Auth length, and same IV used during encryption
+        GCMParameterSpec spec = new GCMParameterSpec(T_LEN,iv);
+
+        // Initalize Cipher decrypt in DECYPT MODE using key and IV spec above
+        decryptionCipher.init(Cipher.DECRYPT_MODE,key,spec);
+
+        // encrypted bytes to basic text
+        byte[] decryptedBytes = decryptionCipher.doFinal(cipherText);
+        return new String(decryptedBytes); // return decrypted bytes to String
+
     }
 
     // encode the ciphertext into Base64
     private String encode (byte[] data) { // byte array encodes Base64 and return
         return Base64.getEncoder().encodeToString(data);
-
     }
 
     // decrypt original message
-    private String decode (String data) {
-
-        return data;
+    private byte[] decode (String data) {
+        return Base64.getDecoder().decode(data); // take Base64 string and decode into byte array and return
     }
-
-
 
 }
