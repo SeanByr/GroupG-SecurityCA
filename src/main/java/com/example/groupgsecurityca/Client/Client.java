@@ -3,9 +3,12 @@ package com.example.groupgsecurityca.Client;
 import com.example.groupgsecurityca.Controllers.GroupChatController;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
+import com.example.groupgsecurityca.AES.AES_KEY;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
+
 
 /*
 Client Class - Sean Byrne 23343362
@@ -34,7 +37,10 @@ public class Client {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
+            //send username and password to server
             out.write(username);
+            out.newLine();
+            out.write(password);
             out.newLine();
             out.flush();
 
@@ -95,3 +101,4 @@ public class Client {
     }
 
 }
+

@@ -15,15 +15,14 @@ package com.example.groupgsecurityca.Security;
     - It can also handle the updating of keys, rotating salts and store metadata
  */
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,3 +106,4 @@ public class KeyGenerator {
         }
     }
 }
+

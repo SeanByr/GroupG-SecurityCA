@@ -37,5 +37,5 @@ public class UserRecord {
     public LocalDate getCreatedDate(){
         return createdDate;
     }
-}
 
+}

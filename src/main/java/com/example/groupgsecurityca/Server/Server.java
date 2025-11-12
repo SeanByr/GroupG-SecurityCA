@@ -1,5 +1,9 @@
 package com.example.groupgsecurityca.Server;
 
+import com.example.groupgsecurityca.AES.AES_KEY;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -46,3 +50,5 @@ public class Server {
         server.startServer();
     }
 }
+
+

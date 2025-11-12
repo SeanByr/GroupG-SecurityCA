@@ -1,0 +1,14 @@
+Username: pat
+Salt: YT1jyw3CBBn5wd6SYB/BRA==
+Hash: A/OX9lUk5SvEb+H2n0W3KbG++2VRhkrQIlvsOFvZMm4=
+Algorithm: PBKDF2WithHmacSHA256
+Iterations: 65536
+Created Date: 2025-11-09
+---------------------------
+Username: michael
+Salt: hEb2kOOhyoS4eY0/HPzn8Q==
+Hash: cmwZxcfO59md8aiKc25owaVVbyE0JVUgj0LFrjydNA0=
+Algorithm: PBKDF2WithHmacSHA256
+Iterations: 65536
+Created Date: 2025-11-09
+---------------------------
