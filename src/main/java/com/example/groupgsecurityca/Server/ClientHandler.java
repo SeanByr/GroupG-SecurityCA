@@ -6,12 +6,13 @@ import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
 import com.example.groupgsecurityca.AES.AES_KEY;
+import com.example.groupgsecurityca.RSA.RSAEncryption;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -21,17 +22,20 @@ import java.util.ArrayList;
 public class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>(); //keep track of clients
+    public static Map<String, PublicKey> clientPublicKey = new HashMap<>();
     private Socket socket; //socket for connection to client
     BufferedReader in;
     BufferedWriter out;
     String clientUsername;
     private AES_KEY aes; // must be initiliazed to decrypt messages during broadcast
+    private RSAEncryption rsa;
 
     //constructor for creating/adding new clients to list
     public ClientHandler(Socket socket, AES_KEY aes) {
         try{
             this.socket = socket;
             this.aes = aes;
+            this.rsa = new RSAEncryption();
             //initialize input and output streams for client socket
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -39,6 +43,25 @@ public class ClientHandler implements Runnable {
             //take clients information and add them, then announce on server and console
             this.clientUsername = in.readLine();
             String clientPassword = in.readLine();
+
+            /*
+
+            Sean Byrne (23343362)
+            retrieve the generated Public key from the Client and Store to in a hashMap
+
+             */
+
+            String clientPublicKeyBase64 = in.readLine();
+
+            try{
+                byte[] keyBytes = Base64.getDecoder().decode(clientPublicKeyBase64);
+                PublicKey publicKey = java.security.KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
+                clientPublicKey.put(clientUsername, publicKey);
+                System.out.println("[" + getDate() + "][Server]: Stored " + clientUsername + "'s Public Key.");
+            }catch(Exception e){
+                System.out.println("[" + getDate() + "][Server]: failed to read Public Key for "
+                                + clientUsername + ": " + e.getMessage());
+            }
 
             //validate information and log hashing details
             if (!validateAndLogCredentials(clientUsername, clientPassword)) {
@@ -151,13 +174,13 @@ public class ClientHandler implements Runnable {
             try{
                 receivedMessage = in.readLine(); // encrypted from client
 
-
+                System.out.println("[" + clientUsername + "]: " + receivedMessage);
                 String decryptedMessage = receivedMessage;
                 try {
                     decryptedMessage = aes.decrypt(receivedMessage);
                 } catch(Exception ignored){}
 
-                System.out.println("[" + clientUsername + "]: " + decryptedMessage);
+//                System.out.println("[" + clientUsername + "]: " + decryptedMessage);
 
                 broadcastClientMessage(receivedMessage); // send ENCRYPTED version to clients
             } catch(IOException e){
@@ -174,13 +197,26 @@ public class ClientHandler implements Runnable {
             for(ClientHandler clientHandler : clients){
                 if(!clientHandler.clientUsername.equals(this.clientUsername)){
 
-                    clientHandler.out.write(message);
-                    clientHandler.out.newLine();
-                    clientHandler.out.flush();
+                    if(message.contains("Server:")){
+                        clientHandler.out.write(message);
+                        clientHandler.out.newLine();
+                        clientHandler.out.flush();
+                    }else {
+
+                        PublicKey publicKey = clientPublicKey.get(clientHandler.clientUsername);
+                        byte[] encryptedAESKey = rsa.encryptKey(aes.getEncoded(), publicKey);
+                        String encryptedKeyBase64 = Base64.getEncoder().encodeToString(encryptedAESKey);
+
+                        clientHandler.out.write(encryptedKeyBase64 + "::" + message);
+                        clientHandler.out.newLine();
+                        clientHandler.out.flush();
+                    }
                 }
             }
         }catch(IOException e){
             catchEverything(socket,in,out);
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
     //method to get current time for time user joins
@@ -194,6 +230,7 @@ public class ClientHandler implements Runnable {
 
     public void removeFromClientHandler(){
         clients.remove(this);
+        clientPublicKey.remove(this.clientUsername);
         broadcastClientMessage("[" + getDate() + "] Server:" + clientUsername + " has left the chatroom!");
         System.out.println("[" + getDate() + "]" + clientUsername + " Left the server");
 
@@ -218,109 +255,3 @@ public class ClientHandler implements Runnable {
         }
     }
 }
-
-
-
-//@Getter
-//@Setter
-//public class ClientHandler implements Runnable{
-//
-//    public static List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
-//
-////    ClientHandler testClient = new ClientHandler("test", "123");
-//
-//
-//    private Socket socket;
-//    private BufferedReader in;
-//    private BufferedWriter out;
-//    private String clientUsername;
-//    private String clientPassword;
-
-//    public ClientHandler(String username, String password) {
-//        this.clientUsername = username;
-//        this.clientPassword = password;
-//    }
-
-//    public ClientHandler(Socket socket) {
-//        try {
-//            this.socket = socket;
-//            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//
-//            this.clientUsername = in.readLine();
-////            this.clientPassword = in.readLine();
-//
-//            clients.add(this);
-//            BroadCastMessage(clientUsername + ": " + "has joined the chat!");
-//            System.out.println(clientUsername + ": " + "has joined the Server!");
-//        }catch(IOException e){
-//            CloseEverything(socket, in, out);
-//        }
-//    }
-
-//    @Override
-//    public void run(){
-//        try{
-//            String recievedMessage;
-//            while(socket.isConnected()){
-//                recievedMessage = in.readLine();
-//                System.out.println("the server received the message: " + recievedMessage);
-//                BroadCastMessage(recievedMessage);
-//            }
-//        }catch(IOException e){
-//            CloseEverything(socket, in, out);
-//        }
-//    }
-
-//    @Override
-//    public void run() {
-//        try {
-//            String message;
-//            while ((message = in.readLine()) != null) {
-//                System.out.println(clientUsername + ": " + message);
-//                BroadCastMessage(clientUsername + ": " + message);
-//            }
-//        } catch (Exception e) {
-//            CloseEverything(socket, in, out);
-//        }
-//    }
-//
-//
-//    public void BroadCastMessage(String message){
-//        synchronized(clients) {
-//            for (ClientHandler client : new ArrayList<>(clients)) {
-//                try {
-//                    if (!client.clientUsername.equals(this.clientUsername)) {
-//                        client.out.write(message);
-//                        client.out.newLine();
-//                        client.out.flush();
-//                    }
-//                } catch (IOException e) {
-//                    client.CloseEverything(client.socket, in, out);
-//                }
-//            }
-//        }
-//    }
-//
-//    public void RemoveClient(){
-//        clients.remove(this);
-//        BroadCastMessage(clientUsername + ": " + "has left the chat!");
-//    }
-
-//    public void CloseEverything(Socket socket, BufferedReader in, BufferedWriter out){
-//        RemoveClient();
-//        try{
-//            if(in != null){
-//                in.close();
-//            }
-//            if(out != null){
-//                out.close();
-//            }
-//            if(socket != null){
-//                socket.close();
-//            }
-//        }catch(IOException e){
-//            e.printStackTrace();
-//        }
-//    }
-//}

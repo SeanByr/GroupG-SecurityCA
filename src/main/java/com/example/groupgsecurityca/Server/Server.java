@@ -18,10 +18,10 @@ public class Server {
         this.serverSocket = serverSocket;
 
         try {
-        // Generate AES key once
-        AES_KEY aes = new AES_KEY();
-        aes.init();
-        byte[] keyBytes = aes.getEncoded(); // ref getEncoded, from AES for Server
+        // Generate AES key onceaes = new AES_KEY()
+        this.aes = new AES_KEY();
+        this.aes.init();
+        byte[] keyBytes = this.aes.getEncoded(); // ref getEncoded, from AES for Server
         aesKeyString = Base64.getEncoder().encodeToString(keyBytes);
         System.out.println("[Server] AES key generated: " + aesKeyString);
     } catch (Exception e) {

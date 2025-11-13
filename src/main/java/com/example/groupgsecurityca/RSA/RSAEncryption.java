@@ -34,13 +34,13 @@ public class RSAEncryption {
     }
 
     public byte[] encryptKey(byte[] data, PublicKey publicKey) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWITHSHA256ANDMGF1PADDING");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         return cipher.doFinal(data);
     }
 
     public byte[] decryptKey(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWITHSHA256ANDMGF1PADDING");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
         cipher.init(Cipher.DECRYPT_MODE,  keyPair.getPrivate());
         return cipher.doFinal(data);
     }
