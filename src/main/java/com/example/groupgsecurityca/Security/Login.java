@@ -3,7 +3,10 @@ package com.example.groupgsecurityca.Security;
 /*
     Joshua Boyne (23343338)
  */
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Login {
 
@@ -14,19 +17,13 @@ public class Login {
         Returns true if valid or false if its invalid
      */
     public static boolean validateUser(String username, String password) {
-//        try (InputStream inputStream = Login.class.getResourceAsStream("/com/example/groupgsecurityca/data/users.txt");
-//             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-//            if (inputStream == null) {
-//                System.err.println("Error: users.txt not found in resources.");
-//                return false;
-//            }
+        try (InputStream inputStream = Login.class.getResourceAsStream("/com/example/groupgsecurityca/data/users.txt");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            if (inputStream == null) {
+                System.err.println("Error: users.txt not found in resources.");
+                return false;
+            }
 
-//            String line;
-//            String fileUser = null;
-//            String fileSalt = null;
-//            String fileHash = null;
-        String filePath = "src/main/resources/com/example/groupgsecurityca/data/users.txt";
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             String fileUser = null;
             String fileSalt = null;
@@ -73,35 +70,5 @@ public class Login {
             return false;
         }
         return false;
-    }
-
-    public static boolean saveUserToFile(UserRecord user) {
-        String filePath = "/com/example/groupgsecurityca/data/users.txt";
-        try (InputStream inputStream = Login.class.getResourceAsStream(filePath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-             FileWriter writer = new FileWriter("src/main/resources/com/example/groupgsecurityca/data/users.txt", true)) {  // Append mode
-            if (inputStream == null) {
-                System.err.println("Error: users.txt not found");
-                return false;
-            }
-            // Read existing content to ensure proper appending
-            StringBuilder existingContent = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                existingContent.append(line).append("\n");
-            }
-            // Append new user in the correct format
-            writer.write("Username: " + user.getUsername() + "\n");
-            writer.write("Salt: " + new String(user.getSalt()) + "\n");  // Assuming salt is Base64
-            writer.write("Hash: " + new String(user.getHash()) + "\n");  // Assuming hash is Base64
-            writer.write("Algorithm: " + user.getAlgorithm() + "\n");
-            writer.write("Iterations: " + user.getIterations() + "\n");
-            writer.write("Created Date: " + user.getCreatedDate() + "\n");
-            writer.write("---------------------------\n");
-            return true;
-        } catch (IOException e) {
-            System.err.println("Error saving user to users.txt: " + e.getMessage());
-            return false;
-        }
     }
 }
