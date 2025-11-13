@@ -2,6 +2,7 @@ package com.example.groupgsecurityca.Client;
 
 import com.example.groupgsecurityca.AES.AES_KEY;
 import com.example.groupgsecurityca.Controllers.GroupChatController;
+import com.example.groupgsecurityca.RSA.RSAEncryption;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
 import com.example.groupgsecurityca.AES.AES_KEY;
@@ -45,7 +46,7 @@ public class Client {
             aes.initBytes(keyBytes); // get key bytes = base64 -- key
             System.out.println("[Client] AES key received and initialized."); // make sure is working
 
-
+            RSAEncryption rsa = new RSAEncryption();
 
             out.write(username);
             out.newLine();
@@ -62,10 +63,9 @@ public class Client {
 
     // gets the message from the client-groupchat-view.fxml textfield
     // sends the message to the Server(ClientHandler class) to be broadcast to all clients
-    // TODO : encrypt the message
     public void SendMessage(String sendMessage){
         try {
-                // TODO : encrypt before message is written out to the server for broadcasting
+
             String encrypted = aes.encrypt(sendMessage); // encrypted messages when sending
 
                 out.write(encrypted);
