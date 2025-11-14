@@ -99,14 +99,9 @@
                             String encryptedMessage = msgSegments[1];
 
                             byte[] encryptedAESKeyBytes = Base64.getDecoder().decode(encryptedAESKeyBase64);
-
                             byte[] aesKeyBytes = rsa.decryptKey(encryptedAESKeyBytes);
                             aes.initBytes(aesKeyBytes);
-
-
-
                             String decryptedMessage = aes.decrypt(encryptedMessage);
-
                             Platform.runLater(() -> {
                                 GroupChatController.addLabel(decryptedMessage, vBox);
                             });
@@ -116,18 +111,7 @@
                                 GroupChatController.addLabel(finalReceivedMessage, vBox);
                             });
                         }
-//
-//
-//
-//                        String decrypted = receivedMessage;
-//                        try {
-//                            decrypted = aes.decrypt(receivedMessage);
-//                        } catch (Exception ignored) {}
-//
-//                        String finalDecrypted = decrypted;
-//                        Platform.runLater(() -> {
-//                            GroupChatController.addLabel(finalDecrypted, vBox);
-//                        });
+
 
                     }catch(IllegalArgumentException e){
                         System.out.println("invalid base64 message received: " + receivedMessage);
