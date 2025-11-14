@@ -15,23 +15,27 @@
     Client Class - Sean Byrne 23343362
     Class that represents each Client connected to the server
     Class Used for sending and listening for messages from the group chat.
-
+    Class handles secure communication by using RSA for key exchange and AES for message encryption/decryption
 
      */
 
-    //TODO : RSA encryption / create public and private keys for the clients
 
     public class Client {
 
-        private Socket socket;
-        private BufferedReader in;
-        private BufferedWriter out;
+        private Socket socket;  //socket for establishing connect with the server and data transfer
+        private BufferedReader in;  //reads incoming messages from the server
+        private BufferedWriter out; //writes outgoing messages to the server
         private String username;
         private String password;
-        private AES_KEY aes;
-        private RSAEncryption rsa;
+        private AES_KEY aes;    //AES key object for symmetric encryption/decryption of message in the group chat
+        private RSAEncryption rsa;  //RSA key object for asymmetric key exchange
 
-        // create client objects that represent each client on the server
+        /*
+        constructor for Client class, initializes the client connection to the server
+        sets up input and output streams, receives and initializes the AES key from the server
+        then generates an RSA keypair for secure key exchange and sends the clients details such as:
+        username, password and public key to the server for authentication and sharing of keys
+         */
         public Client(Socket socket, String username, String password) {
             try {
                 this.socket = socket;
@@ -46,10 +50,10 @@
                 aes = new AES_KEY();
                 aes.initBytes(keyBytes); // get key bytes = base64 -- key
                 System.out.println("[Client] AES key received and initialized."); // make sure is working
-
+                // generates RSA keypair for each individual instance of the client
                 this.rsa = new RSAEncryption();
                 this.rsa.generateKeypair();;
-
+                //sends username, password and base64 encoded public key to the server
                 out.write(username);
                 out.newLine();
                 out.write(password);
@@ -92,9 +96,12 @@
                 try {
                     while ((receivedMessage = in.readLine()) != null) {
                     try{
+
+                        //split the received message into 2 segments: One for the encrypted AES key, other for the encrypted message
                         String[] msgSegments = receivedMessage.split("::", 2);
 
                         if (msgSegments.length == 2) {
+                            //decode the base64 encoded encrypted AES eky
                             String encryptedAESKeyBase64 = msgSegments[0];
                             String encryptedMessage = msgSegments[1];
 
@@ -102,6 +109,7 @@
                             byte[] aesKeyBytes = rsa.decryptKey(encryptedAESKeyBytes);
                             aes.initBytes(aesKeyBytes);
                             String decryptedMessage = aes.decrypt(encryptedMessage);
+                            //update the UI in the GroupChatController thread to display the decrypted message
                             Platform.runLater(() -> {
                                 GroupChatController.addLabel(decryptedMessage, vBox);
                             });
@@ -126,17 +134,20 @@
             }).start();
         }
 
-
+        /*
+        method used to cleanly close all I/O and networking resources associated with the client
+        prevents leaks and errors when a client disconnects
+         */
         public void CloseEverything(Socket socket, BufferedReader in, BufferedWriter out){
             try{
                 if(in != null){
-                    in.close();
+                    in.close(); //close input stream
                 }
                 if(out != null){
-                    out.close();
+                    out.close();    //close output stream
                 }
                 if(socket != null){
-                    socket.close();
+                    socket.close(); //close client socket connection
                 }
             }catch(IOException e){
                 e.printStackTrace();
